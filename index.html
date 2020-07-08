@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Firebase Phone Auth</title>
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-auth.js"></script>
+    <link rel="stylesheet" href="./styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="phone-auth-div">
+            <h1>Authenticate Your Mobile Number</h1>
+            <form class="form">
+                <label for="number" class="label">Phone Number</label>
+                <input type="tel" id="number" class="input input1" placeholder="e.g +91123456789">
+            </form>
+            <br>
+            <div class="form" id="recaptcha-container"></div>
+            <button class="form btn" onclick="window.sendSMS();">Send OTP</button>
+            <br>
+            <form class="form">
+                <label for="otp" class="label">Enter OTP</label>
+                <input type="text" id="otp" class="input input2" disabled placeholder="Enter 6 digits OTP">
+            </form>
+            <button class="form btn" id="btn_send_otp" onclick="window.verifyOTP();" disabled>Verify OTP</button>
+        </div>
+    </div>
+    <script>
+        // Your web app's Firebase configuration
+        var firebaseConfig = {
+            apiKey: "AIzaSyB3Z9YiG9f3XNrZsybobmoaaFj_eaeCETQ",
+            authDomain: "doctoroncall-d6a6c.firebaseapp.com",
+            databaseURL: "https://doctoroncall-d6a6c.firebaseio.com",
+            projectId: "doctoroncall-d6a6c",
+            storageBucket: "doctoroncall-d6a6c.appspot.com",
+            messagingSenderId: "465007319881",
+            appId: "1:465007319881:web:5e493a9f12d0e967c45898"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        console.log('Firebase initialized');
+
+        window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container');
+        recaptchaVerifier.render();
+
+        console.log('Recaptcha initialized');
+
+        window.sendSMS = function () {
+            var phoneNumber = document.getElementById('number').value;
+
+            firebase.auth().signInWithPhoneNumber(phoneNumber, window.recaptchaVerifier)
+                .then(function (confirmationResult) {
+                    window.confirmationResult = confirmationResult;
+                    console.log(confirmationResult);
+                    alert('OTP Sent');
+                    document.getElementById('otp').disabled = false;
+                    document.getElementById('btn_send_otp').disabled = false;
+                }).catch((err) => {
+                    alert(err.message);
+                });
+        };
+
+        window.verifyOTP = function () {
+            var otp = document.getElementById('otp').value;
+            window.confirmationResult.confirm(otp)
+                .then((result) => {
+                    alert('Success');
+                    console.log(result.user);
+                }).catch((err) => {
+                    alert(err.message);
+                });
+        };
+    </script>
+</body>
+
+</html>
